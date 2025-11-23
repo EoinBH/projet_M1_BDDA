@@ -29,7 +29,9 @@ $$ LANGUAGE plpgsql;
 
 --Tests :
 --id_auteur = 1 : "WERBER"
-SELECT ajouter_livre('Les Fourmis', 1, NULL, 1991, 10);
+SELECT ajouter_livre('Les Fourmis', 4, 2, 1991, 10); 
+SELECT ajouter_livre('Le Dernier Jour d''un Condamnné', 7, 1, 1991, 10);
+SELECT ajouter_livre('Exemple', 6, 2, 1991, 10);
 
 /*
 --Fonction qui ajoute un livre et vérifie que le nombre d'exemplaires est positif :
@@ -53,9 +55,25 @@ SELECT * FROM  livre;
 DELETE FROM livre;
 ALTER SEQUENCE livre_id_livre_seq RESTART WITH 1;
 
---Fonction qui retourne le nombre total de livres appartenant à une catégorie donnée.
-CREATE OR REPLACE FUNCTION nb_livres_categorie(id_categorie) RETURNS INT AS $$
+
+--Fonction qui insère une nouvelle catégorie dans la table catégorie :
+CREATE OR REPLACE FUNCTION ajouter_categorie(nom TEXT) RETURNS VOID AS $$
 	BEGIN
-		
+		IF nom IS NOT NULL THEN
+			INSERT INTO categorie(nom) VALUES(nom);
+		END IF;
+	END
+$$ LANGUAGE plpgsql;
+
+
+
+
+--Fonction qui retourne le nombre total de livres appartenant à une catégorie donnée.
+CREATE OR REPLACE FUNCTION nb_livres_categorie(id_categorie INT) RETURNS INT AS $$
+	DECLARE
+		nom_livres INT;
+	BEGIN
+		SELECT COUNT * FROM livre WHERE id_categorie [est UNIQUE] INTO nom_livres;
+		RETURN nom_livres;
 	END
 $$ LANGUAGE plpgsql;
