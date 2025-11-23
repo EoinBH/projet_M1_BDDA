@@ -14,7 +14,6 @@ SELECT ajouter_auteur('ORWELL', 'Angleterre');
 --Victor HUGO, France
 SELECT ajouter_auteur('HUGO', 'France');
 
-INSERT INTO auteur VALUES (16, 'WERBER','France');
 
 --Catégories :
 --selon https://bookvillage.app/vendre-ses-livres/type-de-livre-quels-sont-les-principaux-genres-litteraires/
