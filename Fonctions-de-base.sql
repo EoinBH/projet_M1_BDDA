@@ -109,6 +109,7 @@ $$ LANGUAGE plpgsql;
 SELECT nb_livres_categorie(3);
 
 -- Partie 2: Fonctions avec boucle
+--test
 
 -- Partie 3: Fonctions avec curseur
 
