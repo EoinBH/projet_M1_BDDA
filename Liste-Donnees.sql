@@ -13,8 +13,68 @@ SELECT ajouter_auteur('SHAKESPEARE', 'Angleterre');
 SELECT ajouter_auteur('ORWELL', 'Angleterre');
 --Victor HUGO, France
 SELECT ajouter_auteur('HUGO', 'France');
+--Stephen KING, États-Unis
+SELECT ajouter_auteur('KING', 'États-Unis')
+
+--Livres :
+
+
+
 
 --Catégories :
+SELECT ajouter_categorie('Nouvelle');
+SELECT ajouter_categorie('Conte');
+SELECT ajouter_categorie('Mythe');
+SELECT ajouter_categorie('Légende');
+SELECT ajouter_categorie('Biographie');
+SELECT ajouter_categorie('Autobiographie');
+SELECT ajouter_categorie('Chronique');
+SELECT ajouter_categorie('Apologue');
+SELECT ajouter_categorie('Journal');
+SELECT ajouter_categorie('Roman');
+
+SELECT ajouter_categorie('Sentimental');
+SELECT ajouter_categorie('Apprentissage');
+SELECT ajouter_categorie('Anticipation');
+SELECT ajouter_categorie('Science-fiction');
+SELECT ajouter_categorie('Aventure');
+SELECT ajouter_categorie('Philosophique');
+SELECT ajouter_categorie('Picaresque');
+SELECT ajouter_categorie('Policier');
+SELECT ajouter_categorie('Historique');
+SELECT ajouter_categorie('Horreur');
+
+SELECT ajouter_categorie('Chanson');
+SELECT ajouter_categorie('Ballade');
+SELECT ajouter_categorie('Calligramme');
+SELECT ajouter_categorie('Chant Royal');
+SELECT ajouter_categorie('Élégie');
+SELECT ajouter_categorie('Épigramme');
+SELECT ajouter_categorie('Épopée');
+SELECT ajouter_categorie('Fatrasie');
+SELECT ajouter_categorie('Ode');
+
+SELECT ajouter_categorie('Tragédie');
+SELECT ajouter_categorie('Comédie');
+SELECT ajouter_categorie('Farce');
+SELECT ajouter_categorie('Moralité');
+SELECT ajouter_categorie('Drame');
+SELECT ajouter_categorie('Proverbe');
+
+SELECT ajouter_categorie('Essai');
+SELECT ajouter_categorie('Fable');
+SELECT ajouter_categorie('Fabliau');
+SELECT ajouter_categorie('Pamphlet');
+SELECT ajouter_categorie('Sermon');
+
+--Pour voir les données :
+SELECT * FROM  categorie;
+--Supprimer les données si besoin :
+DELETE FROM categorie;
+ALTER SEQUENCE categorie_id_categorie_seq RESTART WITH 1;
+
+
+
 --selon https://bookvillage.app/vendre-ses-livres/type-de-livre-quels-sont-les-principaux-genres-litteraires/
 /*
 1. Le genre narratif
@@ -68,55 +128,3 @@ Les genres romanesques
 – Le pamphlet
 – Le sermon
 */
-
-
-SELECT ajouter_categorie('Nouvelle');
-SELECT ajouter_categorie('Conte');
-SELECT ajouter_categorie('Mythe');
-SELECT ajouter_categorie('Légende');
-SELECT ajouter_categorie('Biographie');
-SELECT ajouter_categorie('Autobiographie');
-SELECT ajouter_categorie('Chronique');
-SELECT ajouter_categorie('Apologue');
-SELECT ajouter_categorie('Journal');
-SELECT ajouter_categorie('Roman');
-
-SELECT ajouter_categorie('Sentimental');
-SELECT ajouter_categorie('Apprentissage');
-SELECT ajouter_categorie('Anticipation');
-SELECT ajouter_categorie('Science-fiction');
-SELECT ajouter_categorie('Aventure');
-SELECT ajouter_categorie('Philosophique');
-SELECT ajouter_categorie('Picaresque');
-SELECT ajouter_categorie('Policier');
-SELECT ajouter_categorie('Historique');
-SELECT ajouter_categorie('Horreur');
-
-SELECT ajouter_categorie('Chanson');
-SELECT ajouter_categorie('Ballade');
-SELECT ajouter_categorie('Calligramme');
-SELECT ajouter_categorie('Chant Royal');
-SELECT ajouter_categorie('Élégie');
-SELECT ajouter_categorie('Épigramme');
-SELECT ajouter_categorie('Épopée');
-SELECT ajouter_categorie('Fatrasie');
-SELECT ajouter_categorie('Ode');
-
-SELECT ajouter_categorie('Tragédie');
-SELECT ajouter_categorie('Comédie');
-SELECT ajouter_categorie('Farce');
-SELECT ajouter_categorie('Moralité');
-SELECT ajouter_categorie('Drame');
-SELECT ajouter_categorie('Proverbe');
-
-SELECT ajouter_categorie('Essai');
-SELECT ajouter_categorie('Fable');
-SELECT ajouter_categorie('Fabliau');
-SELECT ajouter_categorie('Pamphlet');
-SELECT ajouter_categorie('Sermon');
-
---Pour voir les données :
-SELECT * FROM  categorie;
---Supprimer les données si besoin :
-DELETE FROM categorie;
-ALTER SEQUENCE categorie_id_categorie_seq RESTART WITH 1;
