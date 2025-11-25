@@ -4,9 +4,7 @@
 CREATE OR REPLACE FUNCTION ajouter_auteur(p_nom TEXT, p_pays TEXT) 
 RETURNS VOID AS $$
 BEGIN
-    IF p_nom IS NOT NULL THEN
-        INSERT INTO auteur(nom, pays) VALUES (p_nom, p_pays);
-		END IF;
+	INSERT INTO auteur(nom, pays) VALUES (p_nom, p_pays);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -32,41 +30,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
---propuesta angela 
-CREATE OR REPLACE FUNCTION ajouter_livre(p_titre TEXT, p_id_auteur INT, p_id_categorie INT, p_annee INT, p_nb_exemplaires INT)
-RETURNS VOID AS $$
-BEGIN 
-    IF p_titre IS NOT NULL AND p_nb_exemplaires >= 0 THEN
-        INSERT INTO livre(titre, id_auteur, id_categorie, annee, nb_exemplaires) 
-        VALUES (p_titre, p_id_auteur, p_id_categorie, p_annee, p_nb_exemplaires);
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-  
---Tests :
---id_auteur = 1 : "WERBER"
-
 SELECT ajouter_livre('Les Fourmis', 4, 2, 1991, 10); 
 SELECT ajouter_livre('Le Dernier Jour d''un Condamnné', 7, 1, 1991, 10);
 SELECT ajouter_livre('Exemple', 6, 2, 1991, 10);
 
 
-/*
+--Proposition d'Eoin :
 --Fonction qui ajoute un livre et vérifie que le nombre d'exemplaires est positif :
-CREATE OR REPLACE FUNCTION ajouter_livre_test(titre TEXT, nom_auteur TEXT, id_categorie INT, annee INT, nb_exemplaires INT) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION ajouter_livre_text(titre TEXT, nom_auteur TEXT, nom_categorie TEXT, annee INT, nb_exemplaires INT) RETURNS VOID AS $$
 	DECLARE
 		id_aut INT;
+		id_cat INT;
 	BEGIN
 		SELECT id_auteur FROM auteur WHERE nom = nom_auteur INTO id_aut;
-		INSERT INTO livre(titre, id_auteur, id_categorie, annee, nb_exemplaires) VALUES (titre, id_aut, id_categorie, annee, nb_exemplaires);
+		SELECT id_categorie FROM categorie WHERE nom = nom_categorie INTO id_cat;
+		INSERT INTO livre(titre, id_auteur, id_categorie, annee, nb_exemplaires) VALUES (titre, id_aut, id_cat, annee, nb_exemplaires);
 	END
 $$ LANGUAGE plpgsql;
-
---Tests :
-SELECT ajouter_livre_test('Les Fourmis', 'WERBER', NULL, 1991, 10);
-SELECT ajouter_livre_test('Le Dernier Jour d''un Condamnné', 'HUGO', NULL, 1829, 10);
-*/
 
 --Pour voir les données :
 SELECT * FROM  livre;
@@ -74,13 +54,10 @@ SELECT * FROM  livre;
 DELETE FROM livre;
 ALTER SEQUENCE livre_id_livre_seq RESTART WITH 1;
 
-
 --Fonction qui insère une nouvelle catégorie dans la table catégorie :
 CREATE OR REPLACE FUNCTION ajouter_categorie(p_nom TEXT) RETURNS VOID AS $$
 	BEGIN
-		IF p_nom IS NOT NULL THEN
-			INSERT INTO categorie(nom) VALUES(p_nom);
-		END IF;
+		INSERT INTO categorie(nom) VALUES(p_nom);
 	END
 $$ LANGUAGE plpgsql;
 
@@ -103,18 +80,48 @@ RETURNS INT AS $$
     BEGIN
 		    SELECT COUNT (*) INTO nom_livres FROM livre WHERE id_categorie = p_id_categorie;
 		RETURN nom_livres;
-END
+	END
 $$ LANGUAGE plpgsql;
 
 SELECT nb_livres_categorie(3);
 
 -- Partie 2: Fonctions avec boucle
---test
+CREATE OR REPLACE FUNCTION maj_annee_livres() RETURNS VOID AS $$
+	DECLARE
+		liv RECORD;
+	BEGIN
+		FOR liv IN SELECT * FROM livre WHERE annee < 2000
+		LOOP
+			RAISE NOTICE 'Livre : %, Année : %', liv.titre, liv.annee;
+		END LOOP;
+	END;
+$$ LANGUAGE plpgsql;
+
+SELECT maj_annee_livres();
 
 -- Partie 3: Fonctions avec curseur
 
+CREATE OR REPLACE FONCTION liste_livres_auteur(nom_auteur)
+RETURNS - AS $$
+DECLARE
+    -- si on a besoin declarer une varieble
+BEGIN
+    -- ici le code
+    RETURN - ;
+END
+$$ LANGUAGE plpgsql;
+
+
 -- Partie 4: Fonctions avec SQL dynamique
 
+CREATE OR REPLACE FONCTION compter_elements(table_name TEXT) RETURNS - AS $$
+DECLARE
+    -- si on a besoin declarer une varieble
+BEGIN
+    -- ici le code
+    RETURN - ;
+  
+END
+$$ LANGUAGE plpgsql;
+
 -- Partie 5: Trigger guidé
-
-
