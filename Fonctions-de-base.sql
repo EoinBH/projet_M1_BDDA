@@ -101,15 +101,34 @@ SELECT maj_annee_livres();
 
 -- Partie 3: Fonctions avec curseur
 
-CREATE OR REPLACE FONCTION liste_livres_auteur(nom_auteur)
-RETURNS - AS $$
+CREATE OR REPLACE FUNCTION liste_livres_auteur(nom_auteur TEXT) RETURNS SETOF tLivre AS $$
 DECLARE
-    -- si on a besoin declarer une varieble
+	id_aut INT;
+    cursLivres CURSOR FOR SELECT id_auteur, titre FROM livre;
+	tNuplet tLivre;
 BEGIN
-    -- ici le code
-    RETURN - ;
+    SELECT id_auteur FROM auteur WHERE nom = nom_auteur INTO id_aut;
+	OPEN cursLivres;
+	FETCH cursLivres INTO tNuplet;
+	WHILE FOUND LOOP
+		IF tNuplet.id_aut = id_aut THEN
+			RETURN NEXT tNuplet;
+		END IF;
+		FETCH cursLivres INTO tNuplet;
+	END LOOP;
+	CLOSE cursLivres;
+    RETURN;
 END
 $$ LANGUAGE plpgsql;
+
+--Création du type enregistrement tNuplet(nom TEXT, titre TEXT) :
+CREATE TYPE tLivre AS (
+	id_aut INT,
+	titre TEXT
+);
+
+SELECT liste_livres_auteur('HUGO');
+SELECT liste_livres_auteur('KING');
 
 
 -- Partie 4: Fonctions avec SQL dynamique

@@ -19,15 +19,19 @@ SELECT ajouter_auteur('KING', 'États-Unis')
 SELECT ajouter_auteur('KUANG', 'États-Unis')
 
 --Livres :
---"Les Fourmis", Bernard WERBER, categorie, année 1991, 10 exemplaires
+--"Les Fourmis", Bernard WERBER, Science-fiction, année 1991, 10 exemplaires
 SELECT ajouter_livre_text('Les Fourmis', 'WERBER', 'Science-fiction', 1991, 10);
 --"Ulysses", James JOYCE, Autobiographie, année 1920, 10 exemplaires
 SELECT ajouter_livre_text('Ulysses', 'JOYCE', 'Autobiographie', 1920, 10);
---"Le Dernier Jour d'un Condamnné", Victor HUGO, categorie, année 1829, 10 exemplaires
+--"Le Dernier Jour d'un Condamnné", Victor HUGO, Journal, année 1829, 10 exemplaires
 SELECT ajouter_livre_text('Le Dernier Jour d''un Condamnné', 'HUGO', 'Journal', 1829, 10);
---"The Shining", Stephen KING, categorie, année 1977, 10 exemplaires
+--"Les Misérables", Victor HUGO, Drame, année 1862, 10 exemplaires
+SELECT ajouter_livre_text('Les Misérables', 'HUGO', 'Drame', 1862, 10);
+--"The Shining", Stephen KING, Horreur, année 1977, 10 exemplaires
 SELECT ajouter_livre_text('The Shining', 'KING', 'Horreur', 1977, 10);
---"The Tragedy of Macbeth", William SHAKESPEARE, categorie, année 1623, 10 exemplaires
+--"It", Stephen KING, Horreur, année 1986, 10 exemplaires
+SELECT ajouter_livre_text('It', 'KING', 'Horreur', 1986, 10);
+--"The Tragedy of Macbeth", William SHAKESPEARE, Tragédie, année 1623, 10 exemplaires
 SELECT ajouter_livre_text('The Tragedy of Macbeth', 'SHAKESPEARE', 'Tragédie', 1623, 10);
 --"Babel", R.F. KUANG, 'Historique', année 2022, 10 exemplaires
 SELECT ajouter_livre_text('Babel', 'KUANG', 'Historique', 2022, 10);
