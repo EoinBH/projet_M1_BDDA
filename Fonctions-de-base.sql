@@ -144,5 +144,18 @@ END
 $$ LANGUAGE plpgsql;
 
 SELECT compter_elements('auteur');
+SELECT compter_elements('categorie');
 
 -- Partie 5: Trigger guidé
+
+CREATE TRIGGER verif_disponibilite
+BEFORE INSERT ON 'emprunt'
+FOR EACH ROW
+DECLARE
+	nombreExem INT;
+BEGIN
+	SELECT nb_exemplaires FROM livre WHERE id_livre = NEW.id_livre INTO nombreExem;
+	IF nombreExem <= 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Il n''y a plus d''exemplaires !';
+    END IF;
+END
