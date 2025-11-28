@@ -129,18 +129,20 @@ CREATE TYPE tLivre AS (
 
 SELECT liste_livres_auteur('HUGO');
 SELECT liste_livres_auteur('KING');
+SELECT liste_livres_auteur('JOYCE');
 
 
 -- Partie 4: Fonctions avec SQL dynamique
 
-CREATE OR REPLACE FONCTION compter_elements(table_name TEXT) RETURNS - AS $$
+CREATE OR REPLACE FUNCTION compter_elements(table_name TEXT) RETURNS INT AS $$
 DECLARE
-    -- si on a besoin declarer une varieble
+    nombreEnreg INT;
 BEGIN
-    -- ici le code
-    RETURN - ;
-  
+    EXECUTE 'SELECT COUNT (*) FROM ' || table_name INTO nombreEnreg;
+    RETURN nombreEnreg;
 END
 $$ LANGUAGE plpgsql;
+
+SELECT compter_elements('auteur');
 
 -- Partie 5: Trigger guidé
