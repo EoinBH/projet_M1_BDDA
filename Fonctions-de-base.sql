@@ -149,13 +149,45 @@ SELECT compter_elements('categorie');
 -- Partie 5: Trigger guidé
 
 CREATE TRIGGER verif_disponibilite
-BEFORE INSERT ON 'emprunt'
+BEFORE INSERT ON emprunt
 FOR EACH ROW
+EXECUTE PROCEDURE verif_dispo();
+
+DROP TRIGGER verif_disponibilite ON emprunt;
+
+CREATE OR REPLACE FUNCTION verif_dispo() RETURNS TRIGGER AS $$
 DECLARE
 	nombreExem INT;
 BEGIN
 	SELECT nb_exemplaires FROM livre WHERE id_livre = NEW.id_livre INTO nombreExem;
 	IF nombreExem <= 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Il n''y a plus d''exemplaires !';
+        RAISE EXCEPTION 'Il n''y a plus d''exemplaires !';
     END IF;
+	--Diminuer le nombre d'exemplaires :
+	UPDATE livre SET nb_exemplaires = nb_exemplaires - 1 WHERE id_livre = NEW.id_livre;
+	RETURN NEW;
 END
+$$ LANGUAGE plpgsql;
+
+-- Plus de fonctions de base qui seront nécessaires :
+
+CREATE OR REPLACE FUNCTION ajouter_emprunteur(p_nom TEXT) RETURNS VOID AS $$
+BEGIN
+	INSERT INTO emprunteur(nom) VALUES (p_nom);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Cette fonction prend un entier 'duree' qui indique le nombre de jours du prêt
+CREATE OR REPLACE FUNCTION ajouter_emprunt(p_titre_livre TEXT, p_nom_emprunteur TEXT, duree INT) RETURNS VOID AS $$
+DECLARE
+	id_liv INT;
+	id_emp INT;
+	date_fin DATE = CURRENT_DATE + duree;
+BEGIN
+	SELECT id_livre FROM livre WHERE titre = p_titre_livre INTO id_liv;
+	SELECT id_emprunteur FROM emprunteur WHERE nom = p_nom_emprunteur INTO id_emp;
+	INSERT INTO emprunt(id_livre, id_emprunteur, date_retour) VALUES (id_liv, id_emp, date_fin);
+END
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION ajouter_emprunt;

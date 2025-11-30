@@ -35,6 +35,10 @@ SELECT ajouter_livre_text('It', 'KING', 'Horreur', 1986, 10);
 SELECT ajouter_livre_text('The Tragedy of Macbeth', 'SHAKESPEARE', 'Tragédie', 1623, 10);
 --"Babel", R.F. KUANG, 'Historique', année 2022, 10 exemplaires
 SELECT ajouter_livre_text('Babel', 'KUANG', 'Historique', 2022, 10);
+--"The War of the Worlds", George ORWELL, Science-fiction, année 1898, 2 exemplaires
+SELECT ajouter_livre_text('The War of the Worlds', 'ORWELL', 'Science-fiction', 1898, 2);
+
+SELECT * FROM livre;
 
 --Catégories :
 SELECT ajouter_categorie('Nouvelle');
@@ -88,7 +92,26 @@ SELECT * FROM  categorie;
 DELETE FROM categorie;
 ALTER SEQUENCE categorie_id_categorie_seq RESTART WITH 1;
 
+SELECT ajouter_emprunteur('DUPONT');
+SELECT ajouter_emprunteur('CONSTANT');
+SELECT ajouter_emprunteur('MARTIN');
+SELECT ajouter_emprunteur('BERNARD');
+SELECT ajouter_emprunteur('DURAND');
+SELECT ajouter_emprunteur('ROBERT');
+SELECT ajouter_emprunteur('DUBOIS');
+SELECT ajouter_emprunteur('LEBLANC');
+SELECT ajouter_emprunteur('ROUSSEAU');
 
+SELECT * FROM emprunteur;
+DELETE FROM emprunteur;
+ALTER SEQUENCE emprunteur_id_emprunteur_seq RESTART WITH 1;
+
+SELECT ajouter_emprunt('The War of the Worlds', 'DUPONT', 30);
+SELECT ajouter_emprunt('The War of the Worlds', 'CONSTANT', 30);
+SELECT ajouter_emprunt('The War of the Worlds', 'MARTIN', 30);
+
+SELECT * FROM emprunt;
+SELECT * FROM livre;
 
 --selon https://bookvillage.app/vendre-ses-livres/type-de-livre-quels-sont-les-principaux-genres-litteraires/
 /*
