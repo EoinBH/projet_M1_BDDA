@@ -106,11 +106,15 @@ SELECT * FROM emprunteur;
 DELETE FROM emprunteur;
 ALTER SEQUENCE emprunteur_id_emprunteur_seq RESTART WITH 1;
 
-SELECT ajouter_emprunt('The War of the Worlds', 'DUPONT', 30);
-SELECT ajouter_emprunt('The War of the Worlds', 'CONSTANT', 30);
-SELECT ajouter_emprunt('The War of the Worlds', 'MARTIN', 30);
+SELECT ajouter_emprunt('It', 'DUPONT', 30);
+SELECT ajouter_emprunt('It', 'CONSTANT', 30);
+SELECT ajouter_emprunt('It', 'MARTIN', 30);
+SELECT ajouter_emprunt('The Shining', 'BERNARD', 30);
+SELECT ajouter_emprunt('The Shining', 'DURAND', 30);
+SELECT ajouter_emprunt('Babel', 'ROBERT', 30);
 
 SELECT * FROM emprunt;
+DELETE FROM emprunt;
 SELECT * FROM livre;
 
 --selon https://bookvillage.app/vendre-ses-livres/type-de-livre-quels-sont-les-principaux-genres-litteraires/

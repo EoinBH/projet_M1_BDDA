@@ -106,6 +106,8 @@ DECLARE
 	id_aut INT;
     cursLivres CURSOR FOR SELECT id_auteur, titre FROM livre;
 	tNuplet tLivre;
+	-- Proposition d'Angela :
+	-- Utilisation d'une jointure (JOIN)
 BEGIN
     SELECT id_auteur FROM auteur WHERE nom = nom_auteur INTO id_aut;
 	OPEN cursLivres;
@@ -139,7 +141,8 @@ DECLARE
     nombreEnreg INT;
 BEGIN
     EXECUTE 'SELECT COUNT (*) FROM ' || table_name INTO nombreEnreg;
-    -- EXECUTE format('SELECT COUNT (*) FROM %I' || table_name INTO nombreEnreg;)
+	-- Proposition d'Angela :
+	-- EXECUTE format('SELECT COUNT (*) FROM %I' || table_name INTO nombreEnreg;)
     RETURN nombreEnreg;
 END
 $$ LANGUAGE plpgsql;
@@ -192,3 +195,68 @@ END
 $$ LANGUAGE plpgsql;
 
 DROP FUNCTION ajouter_emprunt;
+
+
+-- Partie Ouverte :
+
+-- Fonction (statistique) qui affiche tous les livres (y compris tous les exemplaires et tous les livres qui sont empruntés) :
+CREATE OR REPLACE FUNCTION afficher_livres_totals() RETURNS SETOF tDispo AS $$
+DECLARE
+	livres_dispo INT;
+	livres_empruntes INT;
+	resultat tDispo;
+BEGIN
+	SELECT SUM (nb_exemplaires) FROM livre INTO livres_dispo;
+	SELECT COUNT (*) FROM emprunt INTO livres_empruntes;
+	RAISE NOTICE 'Livres disponisbles : %, Livres empruntés : %', livres_dispo, livres_empruntes;
+	resultat.dispo := livres_dispo;
+    resultat.emprunte := livres_empruntes;
+	RETURN NEXT resultat;
+END
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION afficher_livres_totals;
+
+--Création du type enregistrement tNuplet(dispo INT, emprunte INT) :
+CREATE TYPE tDispo AS (
+	dispo INT,
+	emprunte INT
+);
+
+SELECT afficher_livres_totals();
+
+SELECT * FROM livre;
+
+SELECT * FROM emprunt;
+
+-- Fonction pour afficher les livres les plus empruntés (par auteur / par livre) :
+
+CREATE OR REPLACE FUNCTION plus_empruntes_par_livre() RETURNS SETOF tEmpruntes AS $$
+DECLARE
+	id_liv INT;
+	nom_Livre TEXT;
+	compte INT;
+	resultat tEmpruntes;
+BEGIN
+	SELECT id_livre, COUNT (*) AS livres_comptes
+	FROM emprunt
+	GROUP BY id_livre
+	ORDER BY livres_comptes DESC
+	LIMIT 1
+	INTO id_liv, compte;
+	SELECT titre FROM livre WHERE id_livre = id_liv INTO nom_Livre;
+	resultat.titre := nom_Livre;
+    resultat.nombre_emprunte := compte;
+	RETURN NEXT resultat;
+END
+$$ LANGUAGE plpgsql;
+
+DROP FUNCTION plus_empruntes_par_livre;
+
+--Création du type enregistrement tNuplet(titres TEXT, nombre_emprunte INT) :
+CREATE TYPE tEmpruntes AS (
+	titre TEXT,
+	nombre_emprunte INT
+);
+
+SELECT plus_empruntes_par_livre();
