@@ -139,6 +139,7 @@ DECLARE
     nombreEnreg INT;
 BEGIN
     EXECUTE 'SELECT COUNT (*) FROM ' || table_name INTO nombreEnreg;
+    -- EXECUTE format('SELECT COUNT (*) FROM %I' || table_name INTO nombreEnreg;)
     RETURN nombreEnreg;
 END
 $$ LANGUAGE plpgsql;
