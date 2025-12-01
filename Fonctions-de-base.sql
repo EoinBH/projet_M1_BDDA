@@ -37,7 +37,7 @@ SELECT ajouter_livre('Exemple', 6, 2, 1991, 10);
 
 --Proposition d'Eoin :
 --Fonction qui ajoute un livre et vérifie que le nombre d'exemplaires est positif :
-CREATE OR REPLACE FUNCTION ajouter_livre_text(titre TEXT, nom_auteur TEXT, nom_categorie TEXT, annee INT, nb_exemplaires INT) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION ajouter_livre_texte(titre TEXT, nom_auteur TEXT, nom_categorie TEXT, annee INT, nb_exemplaires INT) RETURNS VOID AS $$
 	DECLARE
 		id_aut INT;
 		id_cat INT;
