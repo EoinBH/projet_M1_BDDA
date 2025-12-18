@@ -1,6 +1,8 @@
--- Partie Ouverte :
+-------------------------------------
+-- Partie 1 : Fonctions classiques
+-------------------------------------
 
--- Fonction (statistique) qui affiche tous les livres (y compris tous les exemplaires et tous les livres qui sont empruntés) :
+-- Fonction (statistique) qui affiche le nombre de livres disponibles ainsi que les nombre de livres empruntés :
 CREATE OR REPLACE FUNCTION afficher_livres_totals() RETURNS SETOF tDispo AS $$
 DECLARE
 	livres_dispo INT;
@@ -16,6 +18,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+--Supprimer la fonction si besoin :
 DROP FUNCTION afficher_livres_totals;
 
 --Création du type enregistrement tNuplet(dispo INT, emprunte INT) :
@@ -24,14 +27,10 @@ CREATE TYPE tDispo AS (
 	emprunte INT
 );
 
+--Tests afficher_livres_totals :
 SELECT afficher_livres_totals();
 
-SELECT * FROM livre;
-
-SELECT * FROM emprunt;
-
--- Fonction pour afficher les livres les plus empruntés (par auteur / par livre) :
-
+--Fonction (statistique) qui affiche le livre le plus emprunté et le nombre de prêts associé :
 CREATE OR REPLACE FUNCTION livre_le_plus_emprunte() RETURNS SETOF tEmpruntes AS $$
 DECLARE
 	id_liv INT;
@@ -53,67 +52,21 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+--Supprimer la fonction si besoin :
 DROP FUNCTION livre_le_plus_emprunte;
 
---Création du type enregistrement tNuplet(titres TEXT, nombre_emprunte INT) :
+--Création du type enregistrement tEmpruntes(titre TEXT, nombre_emprunte INT) :
 CREATE TYPE tEmpruntes AS (
 	titre TEXT,
 	nombre_emprunte INT
 );
 
+--Tests livre_le_plus_emprunte :
 SELECT livre_le_plus_emprunte();
 
----------------------------------
---Propositions d'Angela :
----------------------------------
-
---===============================================================================================================
-
--- Partie 2 : Fonctions et triggers ouverts
-
--- au moins 2 fonctions « classiques » (requêtes, insertions ou statistiques) ;
-
--- function total de livres dispo et pretes 
-CREATE OR REPLACE FUNCTION total_livres() 
-RETURNS TABLE(total_exemplaires INT, total_pretes INT, total_disponibles INT) AS $$
-BEGIN
-    SELECT SUM(nb_exemplaires) INTO total_exemplaires FROM livre;
-
-    SELECT COUNT(*) INTO total_pretes FROM emprunt;
-    total_disponibles := total_exemplaires - total_pretes;
-  
-    RETURN QUERY 
-        SELECT total_exemplaires, total_pretes, total_disponibles;
-END;
-$$ LANGUAGE plpgsql;
-
-
--- Test (la function s'appelle de maniere differente)
-SELECT * FROM total_livres()
-
-
--- plus demande 
-
-CREATE OR REPLACE FUNCTION plus_demande() 
-RETURNS VOID AS $$
-DECLARE
-    rec RECORD;    
-BEGIN
-    FOR rec IN 
-        SELECT l.titre, COUNT(*) AS nb_emprunts FROM emprunt e
-        JOIN livre l ON e.id_livre = l.id_livre
-        GROUP BY l.titre
-        ORDER BY nb_emprunts DESC
-    LOOP
-
-        RAISE NOTICE 'Nombre livre: %, Cantites Livres: %', rec.titre, rec.nb_emprunts;
-    END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
-SELECT plus_demande();
-
--- 1 fonction utilisant un curseur implicite 
+-------------------------------------------------------
+-- Partie 2 : Fonction utilisant un curseur implicite
+-------------------------------------------------------
 
 --Réservation d'un livre s'il n'est pas déjà emprunté :
 CREATE OR REPLACE FUNCTION ajouter_reservation(p_livre TEXT, p_emprunteur TEXT) RETURNS TEXT AS $$
@@ -148,10 +101,15 @@ SELECT ajouter_reservation('It', 'MARTIN');
 SELECT ajouter_reservation('It', 'CONSTANT');
 SELECT ajouter_reservation('It', 'DUPONT');
 
+SELECT ajouter_reservation('The War of the Worlds', 'ROBERT');
+SELECT ajouter_reservation('The War of the Worlds', 'MARTIN');
+SELECT ajouter_reservation('The Shining', 'MARTIN');
 
--- 1 fonction utilisant un curseur explicite 
+-------------------------------------------------------
+-- Partie 3 : Fonction utilisant un curseur explicite
+-------------------------------------------------------
 
---function qui verifie les reservation et ajoute le nom du livre et le nom de qui a fait la reservation
+--Fonction qui vérifie les réservations et ajoute le titre du livre et le nom de l'emprunteur qui l'a réservé :
 CREATE OR REPLACE FUNCTION liste_reservation_detail()
 RETURNS TABLE (id_reservation INT, titre TEXT, nom_emprunteur TEXT, date_reservation DATE, statut TEXT) AS $$
 DECLARE
@@ -178,10 +136,11 @@ $$ LANGUAGE plpgsql;
 
 SELECT * FROM liste_reservation_detail();
 
+----------------------------------------------------
+-- Partie 4 : Fonction utilisant du SQL paramétré
+----------------------------------------------------
 
--- 1 fonction utilisant du SQL paramétré 
--- Donner le nombre total de livres d’une catégorie (parametre = nom catégorie)
-
+--Fonction qui donne le nombre total de livres d’une catégorie (parametre = nom catégorie)
 CREATE OR REPLACE FUNCTION nb_livres_par_categorie(p_categorie TEXT)
 RETURNS INT AS $$
 DECLARE
@@ -197,15 +156,19 @@ $$ LANGUAGE plpgsql;
 SELECT nb_livres_par_categorie('Horreur')
 SELECT nb_livres_par_categorie('Science-fiction')
 
+----------------------------------------------------
+-- Partie 5 : Fonction utilisant du SQL dynamique
+----------------------------------------------------
 
--- 1 fonction utilisant du SQL dynamique justifié. Il est très important de penser à une requête
---qui ne pourra fonctionner correctement qu’à l’aide d’un SQL dynamique 
+--Fonction qui compte le nombre total d'exemplaires après l'application d'un filtre :
+--On peut filtrer par titre, l'auteur ou catégorie du livre
 CREATE OR REPLACE FUNCTION total_exemplaires_filtre(p_type_filtre TEXT, p_valeur TEXT)
 RETURNS INT AS $$
 DECLARE
     total INT;
     sql_query TEXT;
 BEGIN
+	--Construction de la requête selon le filtre passé en paramètre
     IF p_type_filtre = 'titre' THEN
         sql_query := 'SELECT SUM(nb_exemplaires) ' || 'FROM livre l '||
         'WHERE titre = ''' || p_valeur || '''';
@@ -222,6 +185,7 @@ BEGIN
             'Type de filtre invalide: %, attendu ''titre'', ''auteur'' ou ''categorie''',
             p_type_filtre;
     END IF;
+	--Exécution de la requête :
     EXECUTE sql_query INTO total;
 
     IF total IS NULL THEN
@@ -232,16 +196,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+--Tests total_exemplaires_filtre :
 SELECT total_exemplaires_filtre('titre','Les Fourmis');
 SELECT total_exemplaires_filtre('auteur', 'WERBER');
 SELECT total_exemplaires_filtre('categorie','Horreur');
 
--- au moins un trigger cohérent. Ce trigger doit être cohérent et pertinent par rapport à cette base
---de données. Justifiez et expliquez son objectif ainsi que son fonctionnement dans le rapport.
+--------------------------------
+-- Partie 6 : Trigger cohérent
+--------------------------------
 
---Validation de statut reservation de en attente a validee si l'emprunteur il y a pas ce livre prete  
-CREATE OR REPLACE FUNCTION verif_reservation_validee()
-RETURNS TRIGGER AS $$
+--Création d'un trigger qui valide le statut d'une reservation :
+CREATE TRIGGER trig_verif_reservation_validee
+BEFORE UPDATE OF statut ON reservation
+FOR EACH ROW
+EXECUTE FUNCTION verif_reservation_validee();
+
+--Supprimer trigger si besoin :
+DROP TRIGGER trig_verif_reservation_validee ON reservation;
+
+--Fonction associée au trigger trig_verif_reservation_validee qui vérifie si l'emprunteur a déjà le même livre en prêt :
+CREATE OR REPLACE FUNCTION verif_reservation_validee() RETURNS TRIGGER AS $$
 DECLARE
     v_nb_emprunts INT;
 BEGIN
@@ -249,6 +223,7 @@ BEGIN
         SELECT COUNT(*) INTO v_nb_emprunts FROM emprunt
         WHERE id_livre = NEW.id_livre AND id_emprunteur = NEW.id_emprunteur;
         IF v_nb_emprunts >= 1 THEN
+			--L'emprunteur a déjà ce livre en prêt !
             RAISE EXCEPTION
                 'Réservation refusée: l''emprunteur % a déjà ce livre emprunté %.',
                 NEW.id_emprunteur, v_nb_emprunts;
@@ -258,16 +233,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trig_verif_reservation_validee
-BEFORE UPDATE OF statut ON reservation
-FOR EACH ROW
-EXECUTE FUNCTION verif_reservation_validee();
-
+--Tests trig_verif_reservation_validee :
 UPDATE reservation
 SET statut = 'validee'
-WHERE id_reservation = 2;
-
-SELECT * FROM reservation;
-SELECT * FROM emprunt;
-
-DROP TRIGGER trig_verif_reservation_validee ON reservation;
+WHERE id_reservation = 1;

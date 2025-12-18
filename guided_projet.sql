@@ -27,9 +27,9 @@ ALTER SEQUENCE auteur_id_auteur_seq RESTART WITH 1;
 CREATE OR REPLACE FUNCTION ajouter_livre(titre TEXT, id_auteur INT, id_categorie INT, annee INT, nb_exemplaires INT) 
 RETURNS VOID AS $$
 BEGIN
-		IF nb_exemplaires > 0 THEN
-			 INSERT INTO livre(titre, id_auteur, id_categorie, annee, nb_exemplaires) VALUES (titre, id_auteur, id_categorie, annee, nb_exemplaires);
-		END IF;
+	IF nb_exemplaires > 0 THEN
+		INSERT INTO livre(titre, id_auteur, id_categorie, annee, nb_exemplaires) VALUES (titre, id_auteur, id_categorie, annee, nb_exemplaires);
+	END IF;
 END;
 $$ LANGUAGE plpgsql;
 
