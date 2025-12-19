@@ -2,6 +2,11 @@
 -- Partie 1: Fonctions de base
 --------------------------------
 
+-- Note : Par convention, les paramètres des fonctions sont préfixés par ‘p_’ et
+-- les variables des fonctions sont préfixées par ‘v_’ afin d’améliorer la
+-- lisibilité du code et d’éviter toute ambiguïté avec les attributs des
+-- tables.
+
 --Fonction qui insère un nouvel auteur dans la table auteur :
 CREATE OR REPLACE FUNCTION ajouter_auteur(p_nom TEXT, p_pays TEXT) RETURNS VOID AS $$
 BEGIN

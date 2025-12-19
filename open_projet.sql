@@ -2,6 +2,11 @@
 -- Partie 1 : Fonctions classiques
 -------------------------------------
 
+-- Note : Par convention, les paramètres des fonctions sont préfixés par ‘p_’ et
+-- les variables des fonctions sont préfixées par ‘v_’ afin d’améliorer la
+-- lisibilité du code et d’éviter toute ambiguïté avec les attributs des
+-- tables.
+
 -- Fonction (statistique) qui affiche le nombre de livres disponibles ainsi que le nombre de livres empruntés :
 CREATE OR REPLACE FUNCTION afficher_livres_totals() RETURNS SETOF tDispo AS $$
 DECLARE
