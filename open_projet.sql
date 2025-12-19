@@ -2,18 +2,22 @@
 -- Partie 1 : Fonctions classiques
 -------------------------------------
 
--- Fonction (statistique) qui affiche le nombre de livres disponibles ainsi que les nombre de livres empruntés :
+-- Fonction (statistique) qui affiche le nombre de livres disponibles ainsi que le nombre de livres empruntés :
 CREATE OR REPLACE FUNCTION afficher_livres_totals() RETURNS SETOF tDispo AS $$
 DECLARE
 	livres_dispo INT;
 	livres_empruntes INT;
 	resultat tDispo;
 BEGIN
+	--Récupération du nombre total de livres disponibles :
 	SELECT SUM (nb_exemplaires) FROM livre INTO livres_dispo;
+	--Récupération du nombre total de livres empruntés :
 	SELECT COUNT (*) FROM emprunt INTO livres_empruntes;
+	--Affichage du résultat :
 	RAISE NOTICE 'Livres disponisbles : %, Livres empruntés : %', livres_dispo, livres_empruntes;
 	resultat.dispo := livres_dispo;
     resultat.emprunte := livres_empruntes;
+	--Retour du résultat :
 	RETURN NEXT resultat;
 END
 $$ LANGUAGE plpgsql;
@@ -38,16 +42,16 @@ DECLARE
 	compte INT;
 	resultat tEmpruntes;
 BEGIN
-	SELECT id_livre, COUNT (*) AS livres_comptes
-	FROM emprunt
-	GROUP BY id_livre
-	ORDER BY livres_comptes DESC
-	LIMIT 1
-	INTO id_liv, compte;
+	--Récupération du livre le plus emprunté :
+	SELECT id_livre, COUNT (*) AS livres_comptes FROM emprunt GROUP BY id_livre
+	ORDER BY livres_comptes DESC LIMIT 1 INTO id_liv, compte;
+	--Récupération du titre du livre :
 	SELECT titre FROM livre WHERE id_livre = id_liv INTO nom_Livre;
+	--Affichage du résultat :
 	RAISE NOTICE 'Nom du livre le plus emprunté : %, Nombre de prêts : %', nom_Livre, compte;
 	resultat.titre := nom_Livre;
     resultat.nombre_emprunte := compte;
+	--Retour du résultat :
 	RETURN NEXT resultat;
 END
 $$ LANGUAGE plpgsql;
@@ -79,28 +83,29 @@ BEGIN
 	--Récupération des identifiants à partir du texte fourni en paramètres :
 	SELECT id_livre FROM livre WHERE titre = p_livre INTO v_id_livre;
 	SELECT id_emprunteur FROM emprunteur WHERE nom = p_emprunteur INTO v_id_emprunteur;
-
+	--Vérification si le livre existe :
     SELECT nb_exemplaires INTO v_disponible FROM livre WHERE id_livre = v_id_livre;
     IF v_disponible IS NULL THEN 
         RAISE EXCEPTION 'Livre inexistant (%).', v_id_livre;
     END IF; 
-    
+    --Vérification s'il n'y a plus d'exemplaires disponibles :
     SELECT COUNT (*) INTO v_emprunts FROM emprunt WHERE id_livre = v_id_livre;
-    IF v_emprunts >= v_disponible THEN 
+    IF v_emprunts >= v_disponible THEN
+    	--Création de la réservation s'il n'y a plus d'exemplaires disponibles :
         INSERT INTO reservation(id_livre, id_emprunteur)
         VALUES (v_id_livre, v_id_emprunteur);
-        
         RETURN 'Reservation créée';
-    ELSE 
+    ELSE
+    	--Message de refus parce qu'il y a encore des exemplaires disponibles :
         RAISE EXCEPTION 'Il reste des exemplaires : pas besoin de réserver.';
     END IF;
 END;
 $$ LANGUAGE plpgsql;
     
+--Tests ajouter_reservation :
 SELECT ajouter_reservation('It', 'MARTIN');
 SELECT ajouter_reservation('It', 'CONSTANT');
 SELECT ajouter_reservation('It', 'DUPONT');
-
 SELECT ajouter_reservation('The War of the Worlds', 'ROBERT');
 SELECT ajouter_reservation('The War of the Worlds', 'MARTIN');
 SELECT ajouter_reservation('The Shining', 'MARTIN');
@@ -114,33 +119,39 @@ CREATE OR REPLACE FUNCTION liste_reservation_detail()
 RETURNS TABLE (id_reservation INT, titre TEXT, nom_emprunteur TEXT, date_reservation DATE, statut TEXT) AS $$
 DECLARE
     rec RECORD;
+	--Création du curseur explicite :
     cur_reservation CURSOR FOR SELECT r.id_reservation, l.titre, e.nom, r.date_reservation, r.statut  FROM reservation r
         JOIN livre l ON r.id_livre = l.id_livre
         JOIN emprunteur e ON r.id_emprunteur = e.id_emprunteur;
 
-BEGIN 
+BEGIN
+	--Ouverture du curseur :
     OPEN cur_reservation;
     LOOP
+	    --Obtention de la prochaine réservation :
         FETCH cur_reservation INTO rec;
         EXIT WHEN NOT FOUND;
+		--Ajout des détails à la table de retour  :
         id_reservation := rec.id_reservation;
         titre := rec.titre;
         nom_emprunteur := rec.nom;
         date_reservation := rec.date_reservation;
         statut := rec.statut;
         RETURN NEXT;
-    END LOOP; 
+    END LOOP;
+	--Fermeture du curseur :
     CLOSE cur_reservation;  
 END;
 $$ LANGUAGE plpgsql;
 
+--Tests liste_reservation_detail :
 SELECT * FROM liste_reservation_detail();
 
 ----------------------------------------------------
 -- Partie 4 : Fonction utilisant du SQL paramétré
 ----------------------------------------------------
 
---Fonction qui donne le nombre total de livres d’une catégorie (parametre = nom catégorie)
+--Fonction qui retourne le nombre total de livres d’une catégorie (paramètre = nom de la catégorie) :
 CREATE OR REPLACE FUNCTION nb_livres_par_categorie(p_categorie TEXT)
 RETURNS INT AS $$
 DECLARE
@@ -153,6 +164,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+--Tests nb_livres_par_categorie :
 SELECT nb_livres_par_categorie('Horreur')
 SELECT nb_livres_par_categorie('Science-fiction')
 
@@ -161,7 +173,7 @@ SELECT nb_livres_par_categorie('Science-fiction')
 ----------------------------------------------------
 
 --Fonction qui compte le nombre total d'exemplaires après l'application d'un filtre :
---On peut filtrer par titre, l'auteur ou catégorie du livre
+--On peut filtrer par titre, auteur ou catégorie du livre
 CREATE OR REPLACE FUNCTION total_exemplaires_filtre(p_type_filtre TEXT, p_valeur TEXT)
 RETURNS INT AS $$
 DECLARE
@@ -201,9 +213,9 @@ SELECT total_exemplaires_filtre('titre','Les Fourmis');
 SELECT total_exemplaires_filtre('auteur', 'WERBER');
 SELECT total_exemplaires_filtre('categorie','Horreur');
 
---------------------------------
--- Partie 6 : Trigger cohérent
---------------------------------
+-----------------------
+-- Partie 6 : Trigger
+-----------------------
 
 --Création d'un trigger qui valide le statut d'une reservation :
 CREATE TRIGGER trig_verif_reservation_validee

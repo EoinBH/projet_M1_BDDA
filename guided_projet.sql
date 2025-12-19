@@ -3,8 +3,7 @@
 --------------------------------
 
 --Fonction qui insère un nouvel auteur dans la table auteur :
-CREATE OR REPLACE FUNCTION ajouter_auteur(p_nom TEXT, p_pays TEXT) 
-RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION ajouter_auteur(p_nom TEXT, p_pays TEXT) RETURNS VOID AS $$
 BEGIN
 	INSERT INTO auteur(nom, pays) VALUES (p_nom, p_pays);
 END;
@@ -24,8 +23,7 @@ DELETE FROM auteur;
 ALTER SEQUENCE auteur_id_auteur_seq RESTART WITH 1;
 
 --Fonction qui ajoute un livre et vérifie que le nombre d'exemplaires est positif :
-CREATE OR REPLACE FUNCTION ajouter_livre(titre TEXT, id_auteur INT, id_categorie INT, annee INT, nb_exemplaires INT) 
-RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION ajouter_livre(titre TEXT, id_auteur INT, id_categorie INT, annee INT, nb_exemplaires INT) RETURNS VOID AS $$
 BEGIN
 	IF nb_exemplaires > 0 THEN
 		INSERT INTO livre(titre, id_auteur, id_categorie, annee, nb_exemplaires) VALUES (titre, id_auteur, id_categorie, annee, nb_exemplaires);
@@ -41,14 +39,14 @@ SELECT ajouter_livre('Exemple', 6, 2, 1991, 10);
 --Fonction supplémentaire qui ajoute un livre et vérifie que le nombre d'exemplaires est positif :
 --Les paramètres sont de type TEXT !
 CREATE OR REPLACE FUNCTION ajouter_livre_texte(titre TEXT, nom_auteur TEXT, nom_categorie TEXT, annee INT, nb_exemplaires INT) RETURNS VOID AS $$
-	DECLARE
-		id_aut INT;
-		id_cat INT;
-	BEGIN
-		SELECT id_auteur FROM auteur WHERE nom = nom_auteur INTO id_aut;
-		SELECT id_categorie FROM categorie WHERE nom = nom_categorie INTO id_cat;
-		INSERT INTO livre(titre, id_auteur, id_categorie, annee, nb_exemplaires) VALUES (titre, id_aut, id_cat, annee, nb_exemplaires);
-	END
+DECLARE
+	id_aut INT;
+	id_cat INT;
+BEGIN
+	SELECT id_auteur FROM auteur WHERE nom = nom_auteur INTO id_aut;
+	SELECT id_categorie FROM categorie WHERE nom = nom_categorie INTO id_cat;
+	INSERT INTO livre(titre, id_auteur, id_categorie, annee, nb_exemplaires) VALUES (titre, id_aut, id_cat, annee, nb_exemplaires);
+END
 $$ LANGUAGE plpgsql;
 
 --Pour voir les données :
@@ -60,9 +58,9 @@ ALTER SEQUENCE livre_id_livre_seq RESTART WITH 1;
 
 --Fonction supplémentaire qui insère une nouvelle catégorie dans la table catégorie :
 CREATE OR REPLACE FUNCTION ajouter_categorie(p_nom TEXT) RETURNS VOID AS $$
-	BEGIN
-		INSERT INTO categorie(nom) VALUES(p_nom);
-	END
+BEGIN
+	INSERT INTO categorie(nom) VALUES(p_nom);
+END
 $$ LANGUAGE plpgsql;
 
 --Tests ajouter_categorie:
@@ -76,14 +74,13 @@ SELECT ajouter_categorie('Essai');
 SELECT * FROM categorie;
 
 --Fonction qui retourne le nombre total de livres appartenant à une catégorie donnée :
-CREATE OR REPLACE FUNCTION nb_livres_categorie(p_id_categorie INT) 
-RETURNS INT AS $$
-    DECLARE
-		    nom_livres INT;
-    BEGIN
-		    SELECT COUNT (*) INTO nom_livres FROM livre WHERE id_categorie = p_id_categorie;
-		RETURN nom_livres;
-	END
+CREATE OR REPLACE FUNCTION nb_livres_categorie(p_id_categorie INT) RETURNS INT AS $$
+DECLARE
+	nom_livres INT;
+BEGIN
+	SELECT COUNT (*) INTO nom_livres FROM livre WHERE id_categorie = p_id_categorie;
+	RETURN nom_livres;
+END
 $$ LANGUAGE plpgsql;
 
 --Tests nb_livres_categorie :
@@ -110,6 +107,7 @@ BEGIN
 END
 $$ LANGUAGE plpgsql;
 
+--Supprimer la fonction si besoin :
 DROP FUNCTION ajouter_emprunt;
 
 -----------------------------------
@@ -118,14 +116,14 @@ DROP FUNCTION ajouter_emprunt;
 
 --Fonction qui affiche tous les livres publiés avant l'année 2000 :
 CREATE OR REPLACE FUNCTION maj_annee_livres() RETURNS VOID AS $$
-	DECLARE
-		liv RECORD;
-	BEGIN
-		FOR liv IN SELECT * FROM livre WHERE annee < 2000
-		LOOP
-			RAISE NOTICE 'Livre : %, Année : %', liv.titre, liv.annee;
-		END LOOP;
-	END;
+DECLARE
+	liv RECORD;
+BEGIN
+	FOR liv IN SELECT * FROM livre WHERE annee < 2000
+	LOOP
+		RAISE NOTICE 'Livre : %, Année : %', liv.titre, liv.annee;
+	END LOOP;
+END;
 $$ LANGUAGE plpgsql;
 
 --Tests maj_annee_livres :
